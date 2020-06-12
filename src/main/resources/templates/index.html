@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+
+    <script
+            src="https://code.jquery.com/jquery-3.5.0.min.js"
+            integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ="
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+
+
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
+
+    <title>Title</title>
+
+</head>
+
+<body>
+
+
+<div class="container-fluid">
+    <div class="row">
+
+        <main role="main" class="col-md-12 ml-sm-auto col-lg-12 px-4"><div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;"><div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div></div><div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:200%;height:200%;left:0; top:0"></div></div></div>
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <div class="container bg-faded py-3 text-center ">
+                    <h1 class="text-center" >Coronavirus Cases:</h1>
+                    <br>
+                    <h2 class="text-center">Morocco (updated at 12:00 o'clock and 20:00 o'clock):</h2>
+                    <br>
+                    <br>
+
+
+
+
+                    <div class="row">
+                        <div class="col-sm-4 mx-auto p-1">
+                            <div class="card card-body mb-2" id="recoveredBox">
+                                <h5>Recovered</h5>
+                                <code th:text="${moroccoStat.recovered}+' (+'+${moroccoStat.increasedRecovered}+')'">.mx-auto</code>
+
+                            </div>
+                        </div>
+                        <div class="col-sm-4 mx-auto p-1">
+                            <div class="card card-body mb-2" id="confirmedBox">
+                                <h5>Confirmed</h5>
+                                <code th:text="${moroccoStat.confirmed}+' (+'+${moroccoStat.increased}+')'">.mx-auto</code>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 mx-auto p-1">
+                            <div class="card card-body mb-2" id="deathBox">
+                                <h5>Deaths</h5>
+                                <code th:text="${moroccoStat.deaths}+' (+'+${moroccoStat.increasedDeaths}+')'">.mx-auto</code>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="container bg-faded py-3 cnt">
+                search By date : <input class="form-control"  type="date" id="inpDate"> <span>and by county name</span> <input class="form-control" placeholder="default is morocco" id="countyName" type="text">
+                <div class="row">
+                    <div class="container bg-faded py-3">
+                        <div class="row">
+                            <div class="mx-auto w-50 p-3  text-center" id="noData" style="display: none">
+                                <div class="alert alert-danger" id="alert"  role="alert">
+                                    No data for this date , choose another date
+                                </div>
+                            </div>
+                            <div class="mx-auto w-50 p-3  text-center charts" >
+                                <div class="alert alert-info" id="cases" role="alert">
+                                    Chart : Cases By percentage
+                                </div>
+                                <canvas id="myChartPie" width="200" height="200"></canvas>
+
+                            </div>
+                            <div class="mx-auto w-50 p-3  text-center charts">
+                                <div class="alert alert-info" id="cases" role="alert">
+                                    Chart : Cases of the past
+                                    <select id="startDate">
+                                        <option th:each="n : ${#numbers.sequence(7,30)}" th:value="${n}" th:text="${n}"/>
+                                    </select>
+                                    days
+                                    <label for="chartLine"> ( By Increased cases</label>
+                                    <input  type="checkbox" id="chartLine">
+                                    )
+                                </div>
+                                <canvas id="myChart" width="200" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+      <hr>
+<!--            <h2 class="text-center">The world (updated every 4 hours):</h2>
+            <div class="table-responsive">
+
+                <table id="myTable" class="display" style="width:100%">
+                    <thead>
+                    <tr>
+                        <th>Country</th>
+                        <th>Confirmed</th>
+                        <th>Recovered</th>
+                        <th>Deaths</th>
+                        <th>Critical</th>
+
+                    </tr>
+                    </thead>
+
+                </table>
+            </div>-->
+        </main>
+    </div>
+</div>
+<hr>
+<div class="alert alert-info" id="cases" role="alert">
+    Adnane Benkouider 2020
+</div>
+<style>
+    h1{
+        color: royalblue;
+    }
+    #recoveredBox{
+        background-color: darkseagreen;
+    }
+    #confirmedBox{
+        background-color: rgba(255, 206, 86, 1);
+    }
+    #deathBox{
+        background-color: indianred;
+    }
+    .card-body code{
+        color: ghostwhite;
+        font-size: medium;
+        text-align: center;
+    }
+    .card-body{
+        text-align: center;
+    }
+    #cases{
+        text-align: center;
+    }
+    #inpDate,#countyName{
+        width: initial;
+        display: inline-block;
+    }
+    @media screen and (max-width: 767px) {
+        .charts {
+            width:100% !important;
+        }
+        h5{
+            font-size: medium;
+        }
+        .cnt span{
+            display: block;
+        }
+        .cnt input:first-child{
+            display: block;
+        }
+    }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.9.0/feather.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+<script>
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var ctxPie = document.getElementById('myChartPie').getContext('2d');
+    var myChart,myPieChart;
+    var date="",countryName="";
+    var startDay="";
+    var isLineChanged=false;
+
+
+
+
+    function fetchData(){
+        $("#noData").hide();
+        let url="/stat/?date="+date+"&name="+countryName+"&startDay="+startDay;
+        $.getJSON(url, function( json ) {
+
+            let cnt =Object.values(json).length-1;
+            let lastStat = Object.values(json)[cnt];
+            let allCasesCount=lastStat.confirmed+lastStat.recovered+lastStat.deaths;
+            console.log( "JSON Data: " , json);
+            if((lastStat.confirmed+lastStat.recovered+lastStat.deaths)>0)
+            {
+                $(".charts").show();
+                myPieChart = new Chart(ctxPie, {
+                    type: 'pie',
+                    data : {
+                        datasets: [{
+                            data: [lastStat.confirmed, lastStat.recovered, lastStat.deaths],
+                            backgroundColor: ['rgba(255, 206, 86, 1)','rgba(75, 192, 192, 1)','rgb(194,78,78)']
+
+                        }],
+
+                        // These labels appear in the legend and in the tooltips when hovering different arcs
+                        labels: [
+                            'Confirmed ('+((lastStat.confirmed*100)/(allCasesCount+1)).toFixed(2)+'%)',
+                            'Recovered ('+((lastStat.recovered*100)/(allCasesCount+1)).toFixed(2)+'%)',
+                            'Deaths ('+((lastStat.deaths*100)/(allCasesCount+1)).toFixed(2)+'%)'
+                        ]
+                    }
+
+                });
+                myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        //labels: json.map(e=>Object.keys(e)[0]),
+                        labels: Object.keys(json),
+                        datasets: [{
+                            label: isLineChanged===false?'Confirmed cases':'Increased Confirmed cases',
+                            data: Object.values(json).map(e=>isLineChanged===false?e.confirmed:e.increased),
+                            borderColor: 'rgba(255, 206, 86, 1)',
+                            borderWidth: 1
+                        },
+                            {
+                                label: isLineChanged===false?'recovered cases':'Increased recovered cases',
+                                data: Object.values(json).map(e=>isLineChanged===false?e.recovered:e.increasedRecovered),
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                backgroundColor:'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            }
+                            ,
+                            {
+                                label: isLineChanged===false?'Death cases':'Increased death cases',
+                                data: Object.values(json).map(e=>isLineChanged===false?e.deaths:e.increasedDeaths),
+                                borderColor: 'rgb(194,78,78)',
+                                backgroundColor:'rgb(194,78,78)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+
+                });
+            }
+            else
+            {
+                $(".charts").hide();
+                $("#noData").show();
+                $("#noData").find("#alert").text("No data for this date , choose another date");
+            }
+
+
+
+        }).fail(function() {
+            $(".charts").hide();
+            $("#noData").show();
+            $("#noData").find("#alert").text("No data for this country , choose another country");
+        });
+    }
+
+ /*   $.ajax({
+        dataType: "json",
+        url:"/stat/morocco" ,
+        data: data,
+        success: success
+    });*/
+    $(document).ready(function() {
+            let today = new Date();
+            let dateNow = today.getFullYear()+
+                '-'+ (today.getMonth() + 1).toString().padStart(2, 0) +
+                '-' + today.getDate().toString().padStart(2, 0);
+            $("#noData").hide();
+            $("#countyName").val("morocco");
+            $("#inpDate").val(dateNow);
+
+            fetchData();
+        // Setup - add a text input to each footer cell
+        $('#myTable thead tr').clone(true).appendTo( '#myTable thead' );
+        $('#myTable thead tr:eq(1) th').each( function (i) {
+            var title = $(this).text();
+            $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+
+            $( 'input', this ).on( 'keyup change', function () {
+                if ( table.column(i).search() !== this.value ) {
+                    table
+                        .column(i)
+                        .search( this.value )
+                        .draw();
+                }
+            } );
+        } );
+
+        var table = $('#myTable').DataTable( {
+            orderCellsTop: true,
+            fixedHeader: true,
+            ajax: {
+                url: '/stat/world',
+                dataSrc: ''
+            },
+            "columns": [
+                { "data": "country" },
+                { "data": "confirmed" },
+                { "data": "recovered" },
+                { "data": "deaths" },
+                { "data": "critical" }
+
+            ]
+        } );
+
+            $( "#inpDate").change(function() {
+              removeData(myChart);
+              removeData(myPieChart);
+              date=$( this ).val();
+                fetchData();
+            });
+            $( "#countyName").change(function() {
+              removeData(myChart);
+              removeData(myPieChart);
+              countryName=$( this ).val();
+                fetchData();
+            });
+            $( "#chartLine").change(function() {
+              removeData(myChart);
+                removeData(myPieChart);
+               isLineChanged=!isLineChanged;
+                fetchData();
+            });
+            $( "#startDate").change(function() {
+              removeData(myChart);
+                removeData(myPieChart);
+                startDay=$( this ).val();
+                fetchData();
+            });
+    }
+    );
+    function removeData(chart) {
+   /*     chart.data.labels.pop();
+        chart.data.datasets.forEach((dataset) => {
+            dataset.data.pop();
+        });
+        chart.update();
+        */
+        chart.destroy();
+    }
+
+/*    $(document).ready(function() {
+        $('#myTable').DataTable( {
+            ajax: {
+                url: '/stat/world',
+                dataSrc: ''
+            },
+            "columns": [
+                { "data": "country" },
+                { "data": "confirmed" },
+                { "data": "recovered" },
+                { "data": "deaths" },
+                { "data": "critical" }
+
+            ]
+        } );
+    } );*/
+</script>
+</body>
+
+</html>
